@@ -1,0 +1,140 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cloudstrate-scanner
+  namespace: cloudstrate
+  labels:
+    app.kubernetes.io/name: cloudstrate
+    app.kubernetes.io/component: scanner
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudstrate
+        app.kubernetes.io/component: scanner
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      restartPolicy: OnFailure
+      containers:
+        - name: scanner
+          image: cloudstrate:latest
+          imagePullPolicy: IfNotPresent
+          # Override with specific scan command, e.g.:
+          # args: ["scan", "aws", "--profile", "my-profile", "--output", "/data/scan.json"]
+          args: ["scan", "--help"]
+          envFrom:
+            - configMapRef:
+                name: cloudstrate-config
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudstrate-secrets
+                  key: GITHUB_TOKEN
+                  optional: true
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: cloudstrate-secrets
+                  key: AWS_ACCESS_KEY_ID
+                  optional: true
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cloudstrate-secrets
+                  key: AWS_SECRET_ACCESS_KEY
+                  optional: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+# CronJob for scheduled scans (optional)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cloudstrate-scanner-daily
+  namespace: cloudstrate
+  labels:
+    app.kubernetes.io/name: cloudstrate
+    app.kubernetes.io/component: scanner
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 86400
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: cloudstrate
+            app.kubernetes.io/component: scanner
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            fsGroup: 1000
+          restartPolicy: OnFailure
+          containers:
+            - name: scanner
+              image: cloudstrate:latest
+              imagePullPolicy: IfNotPresent
+              args: ["scan", "aws", "--output", "/data/scan.json"]
+              envFrom:
+                - configMapRef:
+                    name: cloudstrate-config
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudstrate-secrets
+                      key: AWS_ACCESS_KEY_ID
+                      optional: true
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: cloudstrate-secrets
+                      key: AWS_SECRET_ACCESS_KEY
+                      optional: true
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities:
+                  drop:
+                    - ALL
+          volumes:
+            - name: data
+              emptyDir: {}

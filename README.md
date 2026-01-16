@@ -23,7 +23,22 @@ pip install -e .
 
 ## Quick Start
 
-### 1. Initialize Configuration
+### 1. Setup Environment
+
+```bash
+# Full setup (Neo4j, AWS, GitHub validation)
+cloudstrate setup init
+
+# Or setup individual components
+cloudstrate setup neo4j --neo4j-password your-password
+cloudstrate setup aws --profile your-profile
+cloudstrate setup github --org your-org
+
+# Check status
+cloudstrate setup check
+```
+
+### 2. Initialize Configuration (Optional)
 
 ```bash
 cloudstrate config init
@@ -82,11 +97,12 @@ cloudstrate analyst query "Show all production accounts"
 
 ```
 cloudstrate --help
-cloudstrate scan --help
-cloudstrate map --help
-cloudstrate analyst --help
-cloudstrate build --help
-cloudstrate config --help
+cloudstrate setup --help    # Environment setup
+cloudstrate scan --help     # Infrastructure scanning
+cloudstrate map --help      # Model mapping
+cloudstrate analyst --help  # Query interface
+cloudstrate build --help    # Terraform generation
+cloudstrate config --help   # Configuration management
 ```
 
 ## Configuration
@@ -101,6 +117,119 @@ Environment variables can override config values:
 - `CLOUDSTRATE_NEO4J_PASSWORD`
 - `CLOUDSTRATE_LLM_PROVIDER`
 - `CLOUDSTRATE_AWS_PROFILE`
+
+## Docker Deployment
+
+### Quick Start with Docker Compose
+
+```bash
+# Start Cloudstrate with Neo4j
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Access services:
+# - Neo4j Browser: http://localhost:7474
+# - Analyst Server: http://localhost:5001
+```
+
+### Environment Variables
+
+Create a `.env` file:
+
+```bash
+NEO4J_PASSWORD=your-secure-password
+GITHUB_TOKEN=your-github-token
+GEMINI_API_KEY=your-gemini-key
+AWS_PROFILE=your-profile
+```
+
+### Run CLI Commands
+
+```bash
+# Interactive CLI
+docker compose --profile cli run --rm cli
+
+# Run a scan
+docker compose --profile scanner run --rm scanner scan aws --output /app/data/scan.json
+```
+
+### Build Images
+
+```bash
+# Build all images
+docker compose build
+
+# Build specific target
+docker build -t cloudstrate:latest --target base .
+docker build -t cloudstrate:analyst --target analyst .
+docker build -t cloudstrate:scanner --target scanner .
+```
+
+## Kubernetes Deployment
+
+### Prerequisites
+
+- Kubernetes cluster (kind, minikube, Docker Desktop, or k3d)
+- kubectl configured
+
+### Deploy with Script
+
+```bash
+# Build and deploy
+./kubernetes/deploy.sh --build
+
+# Deploy only (image already built)
+./kubernetes/deploy.sh
+```
+
+### Deploy Manually
+
+```bash
+# Build image and load into cluster (kind example)
+docker build -t cloudstrate:latest .
+kind load docker-image cloudstrate:latest
+
+# Deploy with kustomize
+kubectl apply -k kubernetes/
+
+# Check status
+kubectl get all -n cloudstrate
+```
+
+### Access Services
+
+```bash
+# NodePort access (default)
+# Neo4j Browser: http://localhost:30474
+# Analyst Server: http://localhost:30501
+
+# Or use port-forwarding
+kubectl port-forward -n cloudstrate svc/neo4j 7474:7474 7687:7687
+kubectl port-forward -n cloudstrate svc/analyst 5001:5001
+```
+
+### Run Scanner Job
+
+```bash
+# Edit scanner-job.yaml with your scan command, then:
+kubectl apply -f kubernetes/scanner-job.yaml
+
+# Watch job progress
+kubectl logs -f job/cloudstrate-scanner -n cloudstrate
+```
+
+### Configuration
+
+Edit `kubernetes/secret.yaml` before deploying:
+
+```yaml
+stringData:
+  NEO4J_PASSWORD: "your-password"
+  GITHUB_TOKEN: "ghp_..."
+  GEMINI_API_KEY: "..."
+```
 
 ## Development
 
