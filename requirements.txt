@@ -1,0 +1,42 @@
+# Cloudstrate Dependencies
+# Install with: pip install -r requirements.txt
+
+# CLI Framework
+click>=8.1.0
+
+# Configuration and Validation
+pydantic>=2.0.0
+pyyaml>=6.0
+
+# AWS SDK
+boto3>=1.28.0
+botocore>=1.31.0
+
+# Neo4j Graph Database
+neo4j>=5.0.0
+
+# Web Framework (for servers)
+flask>=3.0.0
+
+# GitHub Integration
+PyGithub>=2.0.0
+
+# HTTP Client (async support)
+httpx>=0.25.0
+
+# Retry Logic
+tenacity>=8.2.0
+
+# Development/Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Optional: LLM Support
+# For Gemini: pip install google-generativeai
+# For Ollama: pip install ollama
+# For embeddings: pip install sentence-transformers chromadb
+
+# Optional: Authentication
+# authlib>=1.2.0
+# python-jose>=3.3.0

@@ -1,0 +1,120 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloudstrate"
+version = "0.1.0"
+description = "Multi-cloud governance platform for scanning, mapping, analyzing, and generating infrastructure"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Cloudstrate"}
+]
+keywords = ["cloud", "aws", "terraform", "governance", "infrastructure"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Software Development :: Code Generators",
+]
+
+dependencies = [
+    "click>=8.1.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+    "boto3>=1.28.0",
+    "neo4j>=5.0.0",
+    "flask>=3.0.0",
+    "PyGithub>=2.0.0",
+    "httpx>=0.25.0",
+    "tenacity>=8.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+llm = [
+    "google-generativeai>=0.3.0",
+    "ollama>=0.1.0",
+]
+knowledge = [
+    "sentence-transformers>=2.2.0",
+    "chromadb>=0.4.0",
+]
+auth = [
+    "authlib>=1.2.0",
+    "python-jose>=3.3.0",
+]
+all = [
+    "cloudstrate[dev,llm,knowledge,auth]",
+]
+
+[project.scripts]
+cloudstrate = "cloudstrate.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/cloudstrate/cloudstrate"
+Documentation = "https://docs.cloudstrate.io"
+Repository = "https://github.com/cloudstrate/cloudstrate"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cloudstrate*"]
+
+[tool.pytest.ini_options]
+testpaths = ["cloudstrate/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["cloudstrate"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # Pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
