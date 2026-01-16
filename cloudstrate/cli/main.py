@@ -48,9 +48,11 @@ from cloudstrate.cli.map import map_cmd
 from cloudstrate.cli.analyst import analyst
 from cloudstrate.cli.build import build
 from cloudstrate.cli.config_cmd import config_cmd
+from cloudstrate.cli.setup import setup
 
 cli.add_command(scan)
 cli.add_command(map_cmd)
 cli.add_command(analyst)
 cli.add_command(build)
 cli.add_command(config_cmd)
+cli.add_command(setup)
