@@ -124,10 +124,11 @@ Environment variables can override config values:
 
 ```bash
 # Start Cloudstrate with Neo4j
-docker compose up -d
+docker-compose up -d        # v1 syntax
+# or: docker compose up -d  # v2 syntax
 
 # View logs
-docker compose logs -f
+docker-compose logs -f
 
 # Access services:
 # - Neo4j Browser: http://localhost:7474
@@ -149,17 +150,17 @@ AWS_PROFILE=your-profile
 
 ```bash
 # Interactive CLI
-docker compose --profile cli run --rm cli
+docker-compose --profile cli run --rm cli
 
 # Run a scan
-docker compose --profile scanner run --rm scanner scan aws --output /app/data/scan.json
+docker-compose --profile scanner run --rm scanner scan aws --output /app/data/scan.json
 ```
 
 ### Build Images
 
 ```bash
 # Build all images
-docker compose build
+docker-compose build
 
 # Build specific target
 docker build -t cloudstrate:latest --target base .
