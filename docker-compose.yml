@@ -56,7 +56,6 @@ services:
     build:
       context: .
       target: base
-    container_name: cloudstrate-cli
     stdin_open: true
     tty: true
     environment:
@@ -75,36 +74,6 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
-    profiles:
-      - cli
-
-  # Interactive shell access
-  shell:
-    build:
-      context: .
-      target: base
-    container_name: cloudstrate-shell
-    stdin_open: true
-    tty: true
-    environment:
-      - NEO4J_URI=bolt://neo4j:7687
-      - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-cloudstrate}
-      - AWS_PROFILE=${AWS_PROFILE:-}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-    volumes:
-      - ./data:/app/data
-      - ~/.aws:/home/cloudstrate/.aws:ro
-    depends_on:
-      neo4j:
-        condition: service_healthy
-    profiles:
-      - shell
-    entrypoint: ["/bin/bash"]
 
   # Scanner job (runs once and exits)
   scanner:
@@ -121,8 +90,6 @@ services:
     volumes:
       - ./data:/app/data
       - ~/.aws:/home/cloudstrate/.aws:ro
-    profiles:
-      - scanner
 
 volumes:
   neo4j-data:
